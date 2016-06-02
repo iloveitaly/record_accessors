@@ -1,8 +1,11 @@
 # RecordAccessors
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/record_accessors`. To experiment with that code, run `bin/console` for an interactive prompt.
+This incredibly simple gem solves this specific issue:
 
-TODO: Delete this and the text above, and describe your gem
+* http://stackoverflow.com/questions/1676200/listing-the-accessors-in-a-ruby-class
+* http://stackoverflow.com/questions/2487333/fastest-one-liner-way-to-list-attr-accessors-in-ruby
+
+It is useful for processing JSON payloads with PORO subclassing `ActiveModelSerializers::Model`, or any scenario where you need to track and query against the fields defined on a ruby class.
 
 ## Installation
 
@@ -12,25 +15,30 @@ Add this line to your application's Gemfile:
 gem 'record_accessors'
 ```
 
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install record_accessors
-
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+class ShipmentSerializer < ActiveModelSerializers::Model
+  include RecordAccessors
 
-## Development
+  attr_accessor :id, :order_id
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+  def initialize(payload = {})
+    initialize_from_attributes(payload)
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+    super(hash_from_attributes)
+  end
+end
 
-## Contributing
+payload = {
+  id: 123,
+  order_id: 'R123',
+  other_field: 'this will be excluded from the serialized shipment'
+}
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/record_accessors.
+shipment = ShipmentSerializer.new(payload)
 
+render json: shipment
+```
+
+## [License](LICENSE)
